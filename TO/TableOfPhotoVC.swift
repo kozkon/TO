@@ -60,7 +60,6 @@ class TableOfPhotoVC: UIViewController {
         let val = CGFloat(Int(slider.value))
         compressionLabel.text = "\(String(Int(val))) %"
         compressionLevel = (100 - val) / 100
-        print(compressionLevel)
     }
     
     
@@ -300,7 +299,12 @@ extension TableOfPhotoVC {
             
         ])
         
-        activityIndicator.style = .large
+        
+        if #available(iOS 13.0, *) {
+            activityIndicator.style = .large
+        } else {
+            // Fallback on earlier versions
+        }
         
         activityIndicator.hidesWhenStopped = true
         activityIndicator.color = .black
@@ -313,7 +317,7 @@ extension TableOfPhotoVC {
         
         present(ac, animated: true)
         
-        DispatchQueue.global().async{
+        DispatchQueue.global().async {
             
             self.fetchArrayPhotoForFiles()
         }
@@ -445,37 +449,38 @@ extension TableOfPhotoVC {
         for photoInArray in array {
             let imagesFromPhoto = self.dataStoreManager.fetchImagesFromPhoto(photo: photoInArray)
             var imageCount = 0
+
             for imageInPhoto in imagesFromPhoto{
                 
                 if imagesFromPhoto.count > 1 {
                     imageCount += 1
                     guard let imageData = imageInPhoto.image else { return }
                     let imageDataForFile = UIImage(data: imageData)
-                    let smallImage = resizeImage(image: imageDataForFile!, targetSize: CGSize(width: 1512, height: 2016))
-                    
+               
                     let fileURL = url.appendingPathComponent(" \(photoInArray.nameForReport!)_\(imageCount).jpg")
                     
-                    fileManager.createFile(atPath: fileURL.path, contents: smallImage.jpegData(compressionQuality: self.compressionLevel))
+                    fileManager.createFile(atPath: fileURL.path, contents: imageDataForFile?.jpegData(compressionQuality: self.compressionLevel))
+                  
                     
                     countImagesCreated += 1
                     
                     // Background Thread
                     DispatchQueue.main.async {
                         self.currentCountImagesLabel.text = String(self.countImagesCreated)
-                        // self.currentCountImagesLabel.setNeedsDisplay()
-                    }
+                                            }
                 }else{
                     guard let imageData = imageInPhoto.image else { return }
                     let imageDataForFile = UIImage(data: imageData)
-                    let smallImage = resizeImage(image: imageDataForFile!, targetSize: CGSize(width: 1512, height: 2016))
+               
                     let fileURL = url.appendingPathComponent("\(photoInArray.nameForReport!).jpg")
                     
-                    fileManager.createFile(atPath: fileURL.path, contents: smallImage.jpegData(compressionQuality: self.compressionLevel))
+                    fileManager.createFile(atPath: fileURL.path, contents: imageDataForFile?.jpegData(compressionQuality: self.compressionLevel))
+                    //smallImage = UIImage()
                     countImagesCreated += 1
                     
                     DispatchQueue.main.async {
                         self.currentCountImagesLabel.text = String(self.countImagesCreated)
-                        //  self.currentCountImagesLabel.setNeedsDisplay()
+                  
                     }
                 }
             }
@@ -532,31 +537,59 @@ extension TableOfPhotoVC: UITableViewDelegate, UITableViewDataSource {
     
     
     
-   private func resizeImage(image: UIImage, targetSize: CGSize) -> UIImage {
-        let size = image.size
-        
-        let widthRatio  = targetSize.width  / size.width
-        let heightRatio = targetSize.height / size.height
-        
-        // Figure out what our orientation is, and use that to form the rectangle
-        var newSize: CGSize
-        if(widthRatio > heightRatio) {
-            newSize = CGSize(width: size.width * heightRatio, height: size.height * heightRatio)
-        } else {
-            newSize = CGSize(width: size.width * widthRatio,  height: size.height * widthRatio)
-        }
-        
-        // This is the rect that we've calculated out and this is what is actually used below
-        let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
-        
-        // Actually do the resizing to the rect using the ImageContext stuff
-        UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
-        image.draw(in: rect)
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return newImage!
-    }
+//   private func resizeImage(image: UIImage, targetSize: CGSize) -> UIImage {
+//        let size = image.size
+//
+//        let widthRatio  = targetSize.width  / size.width
+//        let heightRatio = targetSize.height / size.height
+//
+//        // Figure out what our orientation is, and use that to form the rectangle
+//        var newSize: CGSize
+//        if(widthRatio > heightRatio) {
+//            newSize = CGSize(width: size.width * heightRatio, height: size.height * heightRatio)
+//        } else {
+//            newSize = CGSize(width: size.width * widthRatio,  height: size.height * widthRatio)
+//        }
+//
+//        // This is the rect that we've calculated out and this is what is actually used below
+//        let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
+//
+//        // Actually do the resizing to the rect using the ImageContext stuff
+//        UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+//        image.draw(in: rect)
+//        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+//        UIGraphicsEndImageContext()
+//
+//        return newImage!
+//    }
+    
+    
+    
+    private func resizeImage(image: UIImage) -> UIImage {
+         let size = image.size
+         
+        let widthRatio  =  0.5
+        let heightRatio = 0.5
+         
+         // Figure out what our orientation is, and use that to form the rectangle
+         var newSize: CGSize
+         if(widthRatio > heightRatio) {
+             newSize = CGSize(width: size.width * heightRatio, height: size.height * heightRatio)
+         } else {
+             newSize = CGSize(width: size.width * widthRatio,  height: size.height * widthRatio)
+         }
+         
+         // This is the rect that we've calculated out and this is what is actually used below
+         let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
+         
+         // Actually do the resizing to the rect using the ImageContext stuff
+         UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+         image.draw(in: rect)
+         let newImage = UIGraphicsGetImageFromCurrentImageContext()
+         UIGraphicsEndImageContext()
+         
+         return newImage!
+     }
     
     
     

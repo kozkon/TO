@@ -17,6 +17,7 @@ class PhotoDescriptionVC: UIViewController {
     var shopName: String!
     private var imagesCount: Int!
     private var dataStoreManager = DataStoreManager()
+    var indexImage: IndexPath!
     
     @IBOutlet weak var desctiptionLabel: UILabel!
     @IBOutlet weak var namePhotoLabel: UILabel!
@@ -79,8 +80,35 @@ class PhotoDescriptionVC: UIViewController {
             editPhoto.image = self.image
             editPhoto.photo = self.photo
             editPhoto.shopName = self.shopName
+            editPhoto.indexImage = self.indexImage
         }
     }
+    
+    private func resizeImage(image: UIImage) -> UIImage {
+         let size = image.size
+         
+        let widthRatio  =  0.5
+        let heightRatio = 0.5
+         
+         // Figure out what our orientation is, and use that to form the rectangle
+         var newSize: CGSize
+         if(widthRatio > heightRatio) {
+             newSize = CGSize(width: size.width * heightRatio, height: size.height * heightRatio)
+         } else {
+             newSize = CGSize(width: size.width * widthRatio,  height: size.height * widthRatio)
+         }
+         
+         // This is the rect that we've calculated out and this is what is actually used below
+         let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
+         
+         // Actually do the resizing to the rect using the ImageContext stuff
+         UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+         image.draw(in: rect)
+         let newImage = UIGraphicsGetImageFromCurrentImageContext()
+         UIGraphicsEndImageContext()
+         
+         return newImage!
+     }
 }
 
 
@@ -105,8 +133,14 @@ extension PhotoDescriptionVC: UITableViewDelegate {
                 self.dataStoreManager.deleteDataObject(object: imageToDelete)
                 
                 self.images.remove(at: indexPath.row)
-                tableView.deleteRows(at: [indexPath], with: .automatic)
-                self.getImagesCount()
+                
+                if #available(iOS 13.0, *) {
+                    tableView.deleteRows(at: [indexPath], with: .automatic)
+                } else {
+                    tableView.reloadData()
+                }
+                
+              self.getImagesCount()
             }
         }
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
@@ -149,6 +183,7 @@ extension PhotoDescriptionVC: UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
+        self.indexImage = indexPath
         self.image = self.images[indexPath.row]
         performSegue(withIdentifier: "toEditPhotoVC", sender: nil)
     }
@@ -181,7 +216,10 @@ extension PhotoDescriptionVC: PHPickerViewControllerDelegate {
                         }.first
                         
                         guard let imageObject = self.dataStoreManager.createImage(with: context) else {return}
-                        imageObject.image = image.jpegData(compressionQuality: 0)
+                        
+                        let imageForSave = self.resizeImage(image: image)
+                        
+                        imageObject.image = imageForSave.jpegData(compressionQuality: 0)
                         
                         photo?.object = self.photo.object
                         
@@ -239,7 +277,10 @@ extension PhotoDescriptionVC: UIImagePickerControllerDelegate, UINavigationContr
             }.first
             
             guard let imageObject = self.dataStoreManager.createImage(with: context) else {return}
-            imageObject.image = (info[.originalImage] as? UIImage)?.jpegData(compressionQuality: 0)
+            
+            guard let image = info[.originalImage] as? UIImage else {return}
+            let imageForSave = self.resizeImage(image: image)
+            imageObject.image = imageForSave.jpegData(compressionQuality: 1)
             
             photo?.object = self.photo.object
             

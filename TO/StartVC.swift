@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreData
+import AVFoundation
 
 class StartVC: UIViewController{
     
@@ -31,6 +32,9 @@ class StartVC: UIViewController{
         self.createReportButton.layer.cornerRadius = 10
         
         fetchData()
+        
+       // print(UIDevice.current.userInterfaceIdiom == .p)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {

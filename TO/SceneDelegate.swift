@@ -7,10 +7,15 @@
 
 import UIKit
 
+@available(iOS 13.0, *)
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
     var dataStoreManager = DataStoreManager()
+    
+    @available(iOS 13.0, *)
+    class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    }
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
