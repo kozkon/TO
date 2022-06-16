@@ -49,7 +49,8 @@ class TableOfPhotoVC: UIViewController {
             self.currentSegmentOfTypePhoto = "other"
             filterContentForSearchText(self.currentSegmentOfTypePhoto)
         default:
-            self.title = "Фотоотчет"
+            self.title = "Фотоотчет "
+            
         }
     }
     
