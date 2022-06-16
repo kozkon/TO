@@ -51,7 +51,7 @@ class EditPhotoVC: UIViewController {
         do{
             try context.save()
             
-            let ac = UIAlertController(title: "Поворот фотогрфии сохранен", message: nil, preferredStyle: .alert)
+            let ac = UIAlertController(title: "Поворот фотографии сохранен", message: nil, preferredStyle: .alert)
             let okAction = UIAlertAction(title: "OK", style: .default)
             ac.addAction(okAction)
             present(ac, animated: true)
