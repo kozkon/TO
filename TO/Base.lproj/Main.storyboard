@@ -424,7 +424,11 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="S04-BB-Vm9">
-                        <barButtonItem key="rightBarButtonItem" systemItem="save" id="RR5-jm-uUm"/>
+                        <barButtonItem key="rightBarButtonItem" systemItem="save" id="RR5-jm-uUm">
+                            <connections>
+                                <action selector="actionForTO:" destination="pwg-B7-Eg5" id="FtX-be-C8n"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="segmentedControl" destination="l3a-xh-C74" id="Fge-Yp-Gte"/>
